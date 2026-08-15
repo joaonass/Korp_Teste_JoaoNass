@@ -1,0 +1,6 @@
+@Estoque.api_HostAddress = http://localhost:5250
+
+GET {{Estoque.api_HostAddress}}
+Accept: application/json
+
+###
