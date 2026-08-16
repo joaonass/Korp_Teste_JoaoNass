@@ -6,4 +6,15 @@ import { Component } from '@angular/core';
   templateUrl: './produto.html',
   styleUrl: './produto.css',
 })
-export class Produto {}
+export class Produto
+{
+  produtos: any[] = [];
+
+  adicionarProduto() {
+    this.produtos.push({});
+  }
+
+  removerProduto(index: number) {
+    this.produtos.splice(index, 1);
+  }
+}

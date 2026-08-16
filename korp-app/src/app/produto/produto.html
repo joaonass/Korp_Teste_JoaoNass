@@ -1,14 +1,105 @@
 <main class="container">
 
-  
   <section class="acoes">
 
     <div class="card">
-      
+
+      <h2>Cadastrar novos produtos</h2>
+
+      <form>
+
+        <div class="produto">
+
+          <h3>Produto 1</h3>
+
+          <div>
+            <label for="nome1">
+              Nome do produto
+            </label>
+
+            <input type="text"
+                   id="nome1"
+                   name="nome1"
+                   placeholder="Nome do produto" />
+          </div>
+
+          <div>
+            <label for="quantidade1">
+              Quantidade do produto
+            </label>
+
+            <input type="number"
+                   id="quantidade1"
+                   name="quantidade1"
+                   min="0"
+                   placeholder="0" />
+          </div>
+
+        </div>
+
+
+        @for (produto of produtos; track $index) {
+
+        <div class="produto">
+
+          <h3>Produto {{ $index + 2 }}</h3>
+
+          <div>
+            <label [for]="'nome' + ($index + 2)">
+              Nome do produto
+            </label>
+
+            <input type="text"
+                   [id]="'nome' + ($index + 2)"
+                   [name]="'nome' + ($index + 2)"
+                   placeholder="Nome do produto" />
+          </div>
+
+          <div>
+            <label [for]="'quantidade' + ($index + 2)">
+              Quantidade do produto
+            </label>
+
+            <input type="number"
+                   [id]="'quantidade' + ($index + 2)"
+                   [name]="'quantidade' + ($index + 2)"
+                   min="0"
+                   placeholder="0" />
+          </div>
+
+          <button type="button"
+                  class="removerB"
+                  (click)="removerProduto($index)">
+            Remover produto
+          </button>
+
+        </div>
+
+        }
+
+
+        <button type="button"
+                class="adicionarB"
+                (click)="adicionarProduto()">
+          + Adicionar outro produto
+        </button>
+
+
+        <button type="submit"
+                class="cadastroB">
+          Cadastrar produtos
+        </button>
+
+      </form>
+
     </div>
 
-
-
   </section>
+
+
+  <button type="button"
+          class="cadastroB">
+    Verificar produtos no estoque
+  </button>
 
 </main>
