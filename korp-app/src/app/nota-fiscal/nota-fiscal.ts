@@ -7,4 +7,14 @@ import { Component } from '@angular/core';
   templateUrl: './nota-fiscal.html',
   styleUrl: './nota-fiscal.css',
 })
-export class NotaFiscal {}
+export class NotaFiscal {
+  notaFiscal: any[] = [];
+
+  adicionarProduto() {
+    this.notaFiscal.push({});
+  }
+
+  removerProduto(index: number) {
+    this.notaFiscal.splice(index, 1);
+  }
+}
