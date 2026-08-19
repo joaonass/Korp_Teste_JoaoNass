@@ -21,4 +21,5 @@
       <Property Name="VWDPort" Value="&quot;59847&quot;" />
     </Properties>
   </Project>
+  <Project Path="NotaFiscal.api/NotaFiscal.api.csproj" />
 </Solution>

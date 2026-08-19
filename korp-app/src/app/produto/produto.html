@@ -1,96 +1,104 @@
 <main class="container">
 
+
+  <!-- ==========================================
+       CADASTRAR PRODUTOS
+       ========================================== -->
+
   <section class="acoes">
 
     <div class="card">
 
       <h2>Cadastrar novos produtos</h2>
 
-      <form>
-
-        <div class="produto">
-
-          <h3>Produto 1</h3>
-
-          <div>
-
-            <p>**Código será gerado automaticamente pelo sistema</p>
-
-            <label for="nome1">
-              Nome do produto
-            </label>
-
-            <input type="text"
-                   id="nome1"
-                   name="nome1"
-                   placeholder="Nome do produto" />
-          </div>
-
-          <div>
-            <label for="quantidade1">
-              Quantidade do produto
-            </label>
-
-            <input type="number"
-                   id="quantidade1"
-                   name="quantidade1"
-                   min="0"
-                   placeholder="0" />
-          </div>
-
-        </div>
-
+      <form (ngSubmit)="cadastrarProdutos()">
 
         @for (produto of produtos; track $index) {
 
         <div class="produto">
 
-          <h3>Produto {{ $index + 2 }}</h3>
+          <h3>
+            Produto {{ $index + 1 }}
+          </h3>
+
+
+          <!-- DESCRIÇÃO -->
 
           <div>
-            <label [for]="'nome' + ($index + 2)">
+
+            <p>
+              **Código será gerado automaticamente pelo sistema
+            </p>
+
+            <label [for]="'nome' + $index">
               Nome do produto
             </label>
 
             <input type="text"
-                   [id]="'nome' + ($index + 2)"
-                   [name]="'nome' + ($index + 2)"
-                   placeholder="Nome do produto" />
+                   [id]="'nome' + $index"
+                   [name]="'nome' + $index"
+                   [(ngModel)]="produto.descricao"
+                   placeholder="Nome do produto"
+                   required />
+
           </div>
 
+
+          <!-- QUANTIDADE -->
+
           <div>
-            <label [for]="'quantidade' + ($index + 2)">
+
+            <label [for]="'quantidade' + $index">
               Quantidade do produto
             </label>
 
             <input type="number"
-                   [id]="'quantidade' + ($index + 2)"
-                   [name]="'quantidade' + ($index + 2)"
+                   [id]="'quantidade' + $index"
+                   [name]="'quantidade' + $index"
+                   [(ngModel)]="produto.saldo"
                    min="0"
-                   placeholder="0" />
+                   placeholder="0"
+                   required />
+
           </div>
+
+
+          <!-- REMOVER PRODUTO -->
+          @if ($index > 0) {
 
           <button type="button"
                   class="removerB"
                   (click)="removerProduto($index)">
+
             Remover produto
+
           </button>
+
+          }
 
         </div>
 
         }
 
 
+        <!-- ADICIONAR PRODUTO -->
+
         <button type="button"
                 class="adicionarB"
                 (click)="adicionarProduto()">
+
           + Adicionar outro produto
+
         </button>
 
 
+        <!-- CADASTRAR -->
+
         <button type="submit"
                 class="cadastroB">
+
           Cadastrar produtos
+
         </button>
 
       </form>
@@ -100,9 +108,122 @@
   </section>
 
 
+  <!-- ==========================================
+       BOTÃO MOSTRAR / OCULTAR ESTOQUE
+       ========================================== -->
+
   <button type="button"
-          class="cadastroB">
-    Verificar produtos no estoque
+          class="cadastroB"
+          (click)="verificarEstoque()">
+
+    {{
+      mostrarEstoque
+        ? 'Ocultar produtos no estoque'
+        : 'Verificar produtos no estoque'
+    }}
+
   </button>
+
+
+  <!-- ==========================================
+       ESTOQUE
+       ========================================== -->
+  @if (mostrarEstoque) {
+
+  <section class="estoque">
+
+    <div class="card">
+
+
+      <!-- CABEÇALHO -->
+
+      <div class="estoque-topo">
+
+        <h2>
+          Produtos em estoque
+        </h2>
+
+
+        <!-- ATUALIZAR -->
+
+        <button type="button"
+                class="atualizarB"
+                (click)="carregarEstoque()">
+
+          Atualizar
+
+        </button>
+
+      </div>
+
+
+      <!-- NENHUM PRODUTO -->
+      @if (produtosEstoque.length === 0) {
+
+      <p>
+        Nenhum produto cadastrado no estoque.
+      </p>
+
+      }
+
+
+      <!-- PRODUTOS -->
+      @else {
+
+      <div class="tabela">
+
+
+        <!-- CABEÇALHO DA TABELA -->
+
+        <div class="linha cabecalho">
+
+          <span>
+            Código
+          </span>
+
+          <span>
+            Produto
+          </span>
+
+          <span>
+            Saldo
+          </span>
+
+        </div>
+
+
+        <!-- REGISTROS -->
+        @for (
+        produto of produtosEstoque;
+        track produto.id
+        ) {
+
+        <div class="linha">
+
+          <span>
+            {{ produto.codigo }}
+          </span>
+
+          <span>
+            {{ produto.descricao }}
+          </span>
+
+          <span>
+            {{ produto.saldo }}
+          </span>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
+    </div>
+
+  </section>
+
+  }
 
 </main>

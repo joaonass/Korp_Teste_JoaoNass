@@ -67,6 +67,13 @@ form {
     gap: 6px;
   }
 
+  .produto p {
+    margin: 0;
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+  }
+
 label {
   font-size: 14px;
   font-weight: 600;
@@ -92,7 +99,12 @@ input {
     color: #9ca3af;
   }
 
-.adicionarB, .removerB {
+  input:invalid:not(:placeholder-shown) {
+    border-color: #ef4444;
+  }
+
+.adicionarB,
+.removerB {
   padding: 12px 16px;
   font-size: 14px;
   font-weight: 600;
@@ -109,9 +121,17 @@ input {
     border-color: #2563eb;
   }
 
+.removerB {
+  align-self: flex-end;
+  color: #dc2626;
+  border-color: #fca5a5;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
   .removerB:hover {
-    background-color: #eff6ff;
-    border-color: #2563eb;
+    background-color: #fef2f2;
+    border-color: #dc2626;
   }
 
 .cadastroB {
@@ -134,11 +154,17 @@ input {
     transform: scale(0.98);
   }
 
+  .cadastroB:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+    transform: none;
+  }
+
 main > .cadastroB {
   display: block;
   width: 100%;
   max-width: 520px;
-  margin: 0 auto;
+  margin: 0 auto 24px;
   background-color: #ffffff;
   color: #2563eb;
   border: 1px solid #2563eb;
@@ -147,3 +173,125 @@ main > .cadastroB {
   main > .cadastroB:hover {
     background-color: #eff6ff;
   }
+
+.atualizarB {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.4s ease;
+}
+
+  .atualizarB::before {
+    content: "";
+    width: 13px;
+    height: 13px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36'/%3E%3Cpolyline points='21 3 21 9 15 9'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: transform 0.4s ease;
+  }
+
+  .atualizarB:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  .atualizarB:active::before {
+    transform: rotate(180deg);
+  }
+
+  .atualizarB:disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
+/* Seção de estoque */
+.estoque {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+  .estoque h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 20px;
+    text-align: center;
+  }
+
+  .estoque > .card > p {
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+    padding: 20px 0;
+  }
+
+/* Tabela de produtos em estoque */
+.tabela {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.linha {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+  .linha:last-child {
+    border-bottom: none;
+  }
+
+  .linha:not(.cabecalho):nth-child(even) {
+    background-color: #f9fafb;
+  }
+
+  .linha:not(.cabecalho):hover {
+    background-color: #eff6ff;
+  }
+
+  .linha.cabecalho {
+    background-color: #f3f4f6;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  .linha span:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: #111827;
+  }
+
+@media (max-width: 480px) {
+  .container {
+    margin: 32px auto;
+    padding: 0 16px;
+  }
+
+  .card {
+    padding: 24px 20px;
+  }
+
+  .linha {
+    grid-template-columns: 1fr 1.5fr 1fr;
+    font-size: 13px;
+  }
+}

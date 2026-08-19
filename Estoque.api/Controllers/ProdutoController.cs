@@ -1,8 +1,7 @@
-﻿using Estoque.api.Data;
+﻿using Estoque.api.DTOs;
 using Estoque.api.Models;
 using Estoque.api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace Estoque.api.Controllers
@@ -19,11 +18,15 @@ namespace Estoque.api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Produto>> CriarProduto(Produto produto)
+        public async Task<ActionResult<Produto>> CriarProduto(CriarProdutoDto dto)
         {
-            var novoProduto = await _produtoService.CriarProduto(produto);
+            var novoProduto = await _produtoService.CriarProduto(dto);
 
-            return CreatedAtAction(nameof(ObterProduto), new { Id = novoProduto.Id }, novoProduto);
+            return CreatedAtAction(
+                nameof(ObterProduto),
+                new { Id = novoProduto.Id },
+                novoProduto
+            );
         }
 
         [HttpGet]
@@ -73,6 +76,20 @@ namespace Estoque.api.Controllers
 
 
         }
+
+        [HttpPatch("{Id}/saldo")]
+        public async  Task<ActionResult<Produto>> BaixarEstoque(int Id, AtualizarSaldoDto dto)
+        {
+            var produto = await _produtoService.BaixarEstoque(Id, dto.Quantidade);
+
+            if(produto == null)
+            {
+                return BadRequest(new { mensagem = "Não foi possivel atualizar o saldo" });
+            }
+            return Ok(produto);
+        }
+        
+        
 
     }
 }

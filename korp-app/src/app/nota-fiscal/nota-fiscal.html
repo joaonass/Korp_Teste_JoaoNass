@@ -6,89 +6,141 @@
 
       <h2>Criar uma nota fiscal</h2>
 
-      <form>
+      <form (ngSubmit)="imprimirNotas()">
+
+        @for (nota of notas; track $index; let indiceNota = $index) {
 
         <div class="nota-fiscal">
 
-          <h3>Nota fiscal</h3>
+          <h3>
+            Nota fiscal {{ indiceNota + 1 }}
+          </h3>
 
           <div>
-            <p>**Código será gerado automaticamente pelo sistema</p>
 
-            <label for="tipo-nota">
+            <p>
+              **Código será gerado automaticamente pelo sistema
+            </p>
+
+            <label [for]="'tipo-nota-' + indiceNota">
               Nota
             </label>
 
-            <select id="tipo-nota" name="tipo-nota">
-              <option value="aberto">Aberto</option>
-              <option value="fechado">Fechado</option>
-            </select>
-          </div>
+            <select [id]="'tipo-nota-' + indiceNota"
+                    [name]="'tipo-nota-' + indiceNota"
+                    [(ngModel)]="nota.status">
 
-          <div class="produto-quantidade">
+              <option value="aberto">
+                Aberto
+              </option>
 
-            <select id="produto" name="produto" class="produto">
-              <option value="">Selecione o produto</option>
-            </select>
-
-            <select id="quantidade" name="quantidade" class="quantidade">
-              <option value="">Qtd</option>
-            </select>
-
-          </div>
-
-        </div>
-
-        @for (notaFiscal of notaFiscal; track $index) {
-
-        <div class="nota-fiscal">
-
-          <h3>Nota fiscal {{ $index + 2 }}</h3>
-
-          <div>
-            <p>**Código será gerado automaticamente pelo sistema</p>
-
-            <label [for]="'tipo-nota' + ($index + 2)">
-              Nota
-            </label>
-
-            <select [id]="'tipo-nota' + ($index + 2)"
-                    [name]="'tipo-nota' + ($index + 2)">
-
-              <option value="aberto">Aberto</option>
-              <option value="fechado">Fechado</option>
-
-            </select>
-          </div>
-
-          <div class="produto-quantidade">
-
-            <select [id]="'produto' + ($index + 2)"
-                    [name]="'produto' + ($index + 2)"
-                    class="produto">
-
-              <option value="">Selecione o produto</option>
-
-            </select>
-
-            <select [id]="'quantidade' + ($index + 2)"
-                    [name]="'quantidade' + ($index + 2)"
-                    class="quantidade">
-                    
-
-              <option value="">Qtd</option>
+              <option value="fechado">
+                Fechado
+              </option>
 
             </select>
 
           </div>
+
+
+
+          <div class="produtos">
+
+            @for (
+            produto of nota.produtos;
+            track produto.id;
+            let indiceProduto = $index
+            ) {
+
+            <div class="produto-quantidade">
+
+
+              <!-- PRODUTO -->
+
+              <select [id]="'produto-' + indiceNota + '-' + indiceProduto"
+                      [name]="'produto-' + indiceNota + '-' + indiceProduto"
+                      class="produto"
+                      [(ngModel)]="produto.produtoId">
+
+                <option [ngValue]="null">
+                  Selecione o produto
+                </option>
+
+                @for (produtoEstoque of produtos; track produtoEstoque.id) {
+
+                <option [ngValue]="produtoEstoque.id">
+                  {{ produtoEstoque.codigo }} - {{ produtoEstoque.descricao }}
+                </option>
+
+                }
+
+              </select>
+
+
+
+              <select [id]="'quantidade-' + indiceNota + '-' + indiceProduto"
+                      [name]="'quantidade-' + indiceNota + '-' + indiceProduto"
+                      class="quantidade"
+                      [(ngModel)]="produto.quantidade">
+
+                <option [ngValue]="null">
+                  Qtd
+                </option>
+
+                <option [ngValue]="1">1</option>
+                <option [ngValue]="2">2</option>
+                <option [ngValue]="3">3</option>
+                <option [ngValue]="4">4</option>
+                <option [ngValue]="5">5</option>
+                <option [ngValue]="6">6</option>
+                <option [ngValue]="7">7</option>
+                <option [ngValue]="8">8</option>
+                <option [ngValue]="9">9</option>
+                <option [ngValue]="10">10</option>
+
+              </select>
+
+
+              @if (nota.produtos.length > 1) {
+
+              <button type="button"
+                      class="removerB"
+                      (click)="removerProduto(indiceNota, indiceProduto)">
+
+                Remover produto
+
+              </button>
+
+              }
+
+            </div>
+
+            }
+
+
+
+            <button type="button"
+                    class="adicionarB"
+                    (click)="adicionarProduto(indiceNota)">
+
+              + Adicionar produto
+
+            </button>
+
+          </div>
+
+
+          @if (notas.length > 1) {
 
           <button type="button"
                   class="removerB"
-                  (click)="removerProduto($index)">
+                  (click)="removerNota(indiceNota)">
 
             Remover nota
 
           </button>
+
+          }
 
         </div>
 
@@ -96,13 +148,17 @@
 
         <button type="button"
                 class="adicionarB"
-                (click)="adicionarProduto()">
+                (click)="adicionarNota()">
+
           + Adicionar outra nota
+
         </button>
 
         <button type="submit"
                 class="cadastroB">
+
           Imprimir notas
+
         </button>
 
       </form>
@@ -111,9 +167,104 @@
 
   </section>
 
+
   <button type="button"
-          class="cadastroB">
-    Verificar todas as notas fiscais
+          class="cadastroB"
+          (click)="mostrarNotas = !mostrarNotas">
+
+    {{
+ mostrarNotas
+      ? 'Ocultar notas fiscais'
+      : 'Verificar todas as notas fiscais'
+    }}
+
   </button>
+
+
+  @if (mostrarNotas) {
+
+  <section class="notas">
+
+    <div class="card">
+
+      <h2>Notas fiscais cadastradas</h2>
+
+      @if (notasCadastradas.length === 0) {
+
+      <p>Nenhuma nota fiscal cadastrada.</p>
+
+      } @else {
+
+      @for (nota of notasCadastradas; track nota.id) {
+
+      <div class="nota-cadastrada">
+
+        <div class="nota-topo">
+
+          <h3>
+            Nota fiscal #{{ nota.id }}
+          </h3>
+
+          <span>
+            Status: {{ nota.status }}
+          </span>
+
+        </div>
+
+
+        <h4>Produtos da nota</h4>
+
+
+        @if (nota.itens.length === 0) {
+
+        <p>
+          Esta nota não possui produtos.
+        </p>
+
+        } @else {
+
+        <div class="tabela">
+
+          <div class="linha cabecalho">
+
+            <span>Produto</span>
+            <span>Quantidade</span>
+
+          </div>
+
+
+          @for (item of nota.itens; track $index) {
+
+          <div class="linha">
+
+            <span>
+              Produto ID: {{ item.produtoId }}
+              Descrição: {{ obterDescricaoProduto(item.produtoId) }}
+
+            </span>
+
+            <span>
+              {{ item.quantidade }}
+            </span>
+
+          </div>
+
+          }
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
+      }
+
+    </div>
+
+  </section>
+
+  }
 
 </main>

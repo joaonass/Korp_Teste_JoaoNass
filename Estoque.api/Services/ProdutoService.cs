@@ -1,4 +1,5 @@
 ﻿using Estoque.api.Data;
+using Estoque.api.DTOs;
 using Estoque.api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,9 +14,20 @@ namespace Estoque.api.Services
             _context = context;
         }
 
-        public async Task<Produto> CriarProduto(Produto produto)
+        public async Task<Produto> CriarProduto(CriarProdutoDto dto)
         {
+            var produto = new Produto
+            {
+                Descricao = dto.Descricao,
+                Saldo = dto.Saldo
+            };
+
             _context.Produto.Add(produto);
+
+            await _context.SaveChangesAsync();
+
+            produto.Codigo = $"PROD-{produto.Id:D6}";
+
             await _context.SaveChangesAsync();
 
             return produto;
@@ -40,7 +52,6 @@ namespace Estoque.api.Services
                 return null;
             }
 
-            produtoExistente.Codigo = produto.Codigo;
             produtoExistente.Descricao = produto.Descricao;
             produtoExistente.Saldo = produto.Saldo;
 
@@ -62,6 +73,32 @@ namespace Estoque.api.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<Produto?> BaixarEstoque(int id, int quantidade)
+        {
+            var produto = await _context.Produto.FindAsync(id);
+
+            if (produto == null)
+            {
+                return null;
+            }
+
+            if (quantidade <= 0)
+            {
+                return null;
+            }
+
+            if (produto.Saldo < quantidade)
+            {
+                return null;
+            }
+
+            produto.Saldo -= quantidade;
+
+            await _context.SaveChangesAsync();
+
+            return produto;
         }
     }
 }
