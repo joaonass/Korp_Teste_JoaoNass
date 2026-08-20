@@ -53,28 +53,27 @@ namespace Estoque.api.Controllers
         {
             var produtoExistente = await _produtoService.AtualizarProduto(Id, produto);
 
-            if(produtoExistente == null)
+            if (produtoExistente == null)
             {
                 return NotFound();
             }
-            produtoExistente.Codigo = produto.Codigo;
-            produtoExistente.Descricao = produto.Descricao;
-            produtoExistente.Saldo = produto.Saldo;
 
             return Ok(produtoExistente);
         }
-        [HttpDelete("{Id}")]
-        public async Task<ActionResult>DeleterProduto(int Id)
+
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeletarProduto(int id)
         {
-            var produtoExcluido = await _produtoService.DeletarProduto(Id);
-            if(!produtoExcluido)
+            var produtoExcluido =
+                await _produtoService.DeletarProduto(id);
+
+            if (!produtoExcluido)
             {
                 return NotFound();
             }
 
             return NoContent();
-
-
         }
 
         [HttpPatch("{Id}/saldo")]

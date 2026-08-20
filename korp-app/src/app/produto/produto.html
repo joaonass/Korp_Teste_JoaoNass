@@ -1,10 +1,5 @@
 <main class="container">
 
-
-  <!-- ==========================================
-       CADASTRAR PRODUTOS
-       ========================================== -->
-
   <section class="acoes">
 
     <div class="card">
@@ -22,12 +17,10 @@
           </h3>
 
 
-          <!-- DESCRIÇÃO -->
-
           <div>
 
             <p>
-              **Código será gerado automaticamente pelo sistema
+              Código será gerado automaticamente pelo sistema
             </p>
 
             <label [for]="'nome' + $index">
@@ -42,9 +35,6 @@
                    required />
 
           </div>
-
-
-          <!-- QUANTIDADE -->
 
           <div>
 
@@ -62,8 +52,6 @@
 
           </div>
 
-
-          <!-- REMOVER PRODUTO -->
           @if ($index > 0) {
 
           <button type="button"
@@ -80,9 +68,6 @@
 
         }
 
-
-        <!-- ADICIONAR PRODUTO -->
-
         <button type="button"
                 class="adicionarB"
                 (click)="adicionarProduto()">
@@ -90,9 +75,6 @@
           + Adicionar outro produto
 
         </button>
-
-
-        <!-- CADASTRAR -->
 
         <button type="submit"
                 class="cadastroB">
@@ -108,10 +90,6 @@
   </section>
 
 
-  <!-- ==========================================
-       BOTÃO MOSTRAR / OCULTAR ESTOQUE
-       ========================================== -->
-
   <button type="button"
           class="cadastroB"
           (click)="verificarEstoque()">
@@ -124,27 +102,17 @@
 
   </button>
 
-
-  <!-- ==========================================
-       ESTOQUE
-       ========================================== -->
   @if (mostrarEstoque) {
 
   <section class="estoque">
 
     <div class="card">
 
-
-      <!-- CABEÇALHO -->
-
       <div class="estoque-topo">
 
         <h2>
           Produtos em estoque
         </h2>
-
-
-        <!-- ATUALIZAR -->
 
         <button type="button"
                 class="atualizarB"
@@ -156,8 +124,6 @@
 
       </div>
 
-
-      <!-- NENHUM PRODUTO -->
       @if (produtosEstoque.length === 0) {
 
       <p>
@@ -166,14 +132,9 @@
 
       }
 
-
-      <!-- PRODUTOS -->
       @else {
 
       <div class="tabela">
-
-
-        <!-- CABEÇALHO DA TABELA -->
 
         <div class="linha cabecalho">
 
@@ -189,10 +150,13 @@
             Saldo
           </span>
 
+          <span>
+            Ações
+          </span>
+
         </div>
 
 
-        <!-- REGISTROS -->
         @for (
         produto of produtosEstoque;
         track produto.id
@@ -204,12 +168,34 @@
             {{ produto.codigo }}
           </span>
 
+
           <span>
             {{ produto.descricao }}
           </span>
 
+
           <span>
             {{ produto.saldo }}
+          </span>
+
+          <span class="acoes-produto">
+
+            <button type="button"
+                    class="editarB"
+                    (click)="editarProduto(produto)">
+
+              Editar
+
+            </button>
+
+            <button type="button"
+                    class="removerB"
+                    (click)="deletarProduto(produto)">
+
+              Excluir
+
+            </button>
+
           </span>
 
         </div>

@@ -1,1 +1,27 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --tinta: #1c2321;
+  --tinta-suave: #4a524f;
+  --papel: #fbf8f1;
+  --papel-marca: #f1ebdc;
+  --verde-selo: #0f5257;
+  --verde-selo-escuro: #0a3a3e;
+  --ambar: #e0973a;
+  --terracota: #c1502e;
+  --salva: #d8e6dc;
+  --linha: #e2d9c4;
+  --sombra: rgba(28, 35, 33, 0.08);
+  --fonte-display: "Fraunces", serif;
+  --fonte-corpo: "Inter", sans-serif;
+  --fonte-mono: "IBM Plex Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--papel-marca);
+  font-family: var(--fonte-corpo);
+  color: var(--tinta);
+}

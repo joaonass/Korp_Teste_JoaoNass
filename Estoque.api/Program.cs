@@ -28,6 +28,16 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+
+// Aplica as migrations automaticamente ao iniciar a API
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EstoqueDbContext>();
+
+    db.Database.Migrate();
+}
+
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

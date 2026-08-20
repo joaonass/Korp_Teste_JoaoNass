@@ -12,6 +12,10 @@ import {
   CriarNotaFiscal
 } from '../services/nota-fiscal.service';
 
+import {
+  ChangeDetectorRef
+} from '@angular/core';
+
 
 interface ProdutoNota {
   id: number;
@@ -31,9 +35,101 @@ interface Nota {
   templateUrl: './nota-fiscal.html',
   styleUrl: './nota-fiscal.css',
 })
-
-
 export class NotaFiscal implements OnInit {
+
+  produtoJaSelecionado(
+    nota: Nota,
+    produtoId: number,
+    indiceProdutoAtual: number
+  ): boolean {
+
+    return nota.produtos.some(
+      (produto, indice) =>
+        indice !== indiceProdutoAtual &&
+        produto.produtoId === produtoId
+    );
+
+  }
+
+  private proximoIdProduto = 1;
+
+  produtos: ProdutoModel[] = [];
+
+  notas: Nota[] = [
+    {
+      status: 'Aberto',
+      produtos: [
+        {
+          id: this.proximoIdProduto++,
+          produtoId: null,
+          quantidade: null
+        }
+      ]
+    }
+  ];
+
+  notasCadastradas: NotaFiscalModel[] = [];
+
+  mostrarNotasFechadas = false;
+
+  carregando = false;
+
+
+  constructor(
+    private produtoService: ProdutoService,
+    private notaFiscalService: NotaFiscalService,
+    private cdr: ChangeDetectorRef
+
+  ) { }
+
+
+  ngOnInit(): void {
+
+    this.produtoService.listarProdutos().subscribe({
+
+      next: (produtos) => {
+
+        console.log(
+          'Produtos carregados:',
+          produtos
+        );
+
+        this.produtos = produtos;
+
+      },
+
+      error: (erro) => {
+
+        console.error(
+          'Erro ao carregar produtos:',
+          erro
+        );
+
+      }
+
+    });
+
+    this.carregarNotas();
+
+  }
+
+  get notasAbertas(): NotaFiscalModel[] {
+
+    return this.notasCadastradas.filter(
+      nota => nota.status === 'Aberta'
+    );
+
+  }
+
+
+  get notasFechadas(): NotaFiscalModel[] {
+
+    return this.notasCadastradas.filter(
+      nota => nota.status === 'Fechada'
+    );
+
+  }
+
 
   obterDescricaoProduto(produtoId: number): string {
 
@@ -47,76 +143,26 @@ export class NotaFiscal implements OnInit {
 
   }
 
-  private proximoIdProduto = 1;
 
-  produtos: ProdutoModel[] = [];
+  obterSaldoProduto(produtoId: number | null): number {
 
-  notas: Nota[] = [
-    {
-      status: 'aberto',
-      produtos: [
-        {
-          id: this.proximoIdProduto++,
-          produtoId: null,
-          quantidade: null
-        }
-      ]
+    if (produtoId === null) {
+      return 0;
     }
-  ];
 
-  notasCadastradas: NotaFiscalModel[] = [];
+    const produto = this.produtos.find(
+      p => p.id === produtoId
+    );
 
-  mostrarNotas = false;
-
-  carregando = false;
-
-
-  constructor(
-    private produtoService: ProdutoService,
-    private notaFiscalService: NotaFiscalService
-  ) { }
-
-
-
-  ngOnInit(): void {
-
-    this.produtoService.listarProdutos().subscribe({
-
-      next: (produtos) => {
-        console.log('Produtos carregados:', produtos);
-
-        this.produtos = produtos;
-      },
-
-      error: (erro) => {
-        console.error('Erro ao carregar produtos:', erro);
-      }
-
-    });
-
-
-    this.notaFiscalService.listarNotas().subscribe({
-
-      next: (notas) => {
-        console.log('Notas recebidas:', notas);
-
-        this.notasCadastradas = notas;
-      },
-
-      error: (erro) => {
-        console.error('Erro ao buscar notas:', erro);
-      }
-
-    });
+    return produto?.saldo ?? 0;
 
   }
-
 
   adicionarNota(): void {
 
     this.notas.push({
 
-      status: 'aberto',
+      status: 'Aberto',
 
       produtos: [
         {
@@ -130,9 +176,13 @@ export class NotaFiscal implements OnInit {
 
   }
 
+
   removerNota(indiceNota: number): void {
 
-    this.notas.splice(indiceNota, 1);
+    this.notas.splice(
+      indiceNota,
+      1
+    );
 
   }
 
@@ -150,6 +200,7 @@ export class NotaFiscal implements OnInit {
 
   }
 
+
   removerProduto(
     indiceNota: number,
     indiceProduto: number
@@ -162,8 +213,7 @@ export class NotaFiscal implements OnInit {
 
   }
 
-
-  imprimirNotas(): void {
+  cadastrarNotas(): void {
 
     console.log(
       'Notas que serão enviadas:',
@@ -173,24 +223,62 @@ export class NotaFiscal implements OnInit {
 
     for (const nota of this.notas) {
 
-      const possuiProdutoInvalido =
-        nota.produtos.some(
+      for (const produto of nota.produtos) {
 
-          produto =>
-            produto.produtoId === null ||
-            produto.quantidade === null ||
-            produto.quantidade <= 0
+        if (produto.produtoId === null) {
 
+          alert(
+            'Selecione um produto antes de cadastrar a nota.'
+          );
+
+          return;
+
+        }
+
+
+        if (
+          produto.quantidade === null ||
+          produto.quantidade <= 0
+        ) {
+
+          alert(
+            'Informe uma quantidade válida para todos os produtos.'
+          );
+
+          return;
+
+        }
+
+
+        const produtoEstoque = this.produtos.find(
+          p => p.id === produto.produtoId
         );
 
 
-      if (possuiProdutoInvalido) {
+        if (!produtoEstoque) {
 
-        alert(
-          'Selecione todos os produtos e suas quantidades antes de imprimir.'
-        );
+          alert(
+            'O produto selecionado não existe no estoque.'
+          );
 
-        return;
+          return;
+
+        }
+
+
+        if (
+          produto.quantidade >
+          produtoEstoque.saldo
+        ) {
+
+          alert(
+            `Estoque insuficiente para "${produtoEstoque.descricao}".\n` +
+            `Saldo disponível: ${produtoEstoque.saldo}.`
+          );
+
+          return;
+
+        }
 
       }
 
@@ -199,26 +287,28 @@ export class NotaFiscal implements OnInit {
 
     this.carregando = true;
 
-    const requisicoes = this.notas.map(nota => {
 
-      const novaNota: CriarNotaFiscal = {
+    const requisicoes =
+      this.notas.map(nota => {
 
-        itens: nota.produtos.map(produto => ({
+        const novaNota: CriarNotaFiscal = {
 
-          produtoId: produto.produtoId!,
+          itens: nota.produtos.map(produto => ({
 
-          quantidade: produto.quantidade!
+            produtoId: produto.produtoId!,
 
-        }))
+            quantidade: produto.quantidade!
 
-      };
+          }))
+
+        };
 
 
-      return this.notaFiscalService.criarNota(
-        novaNota
-      );
+        return this.notaFiscalService.criarNota(
+          novaNota
+        );
 
-    });
+      });
 
 
     let concluidas = 0;
@@ -240,7 +330,8 @@ export class NotaFiscal implements OnInit {
 
 
           if (
-            concluidas === requisicoes.length
+            concluidas ===
+            requisicoes.length
           ) {
 
             this.finalizarCadastroNotas();
@@ -262,6 +353,7 @@ export class NotaFiscal implements OnInit {
 
 
           alert(
+            erro.error?.mensagem ||
             'Ocorreu um erro ao criar uma das notas fiscais.'
           );
 
@@ -288,7 +380,7 @@ export class NotaFiscal implements OnInit {
 
       {
 
-        status: 'aberto',
+        status: 'Aberto',
 
         produtos: [
 
@@ -313,35 +405,9 @@ export class NotaFiscal implements OnInit {
 
   }
 
-  verificarNotas(): void {
-
-    console.log(
-      'Botão verificar notas clicado'
-    );
-
-
-    if (this.mostrarNotas) {
-
-      this.mostrarNotas = false;
-
-      return;
-
-    }
-
-    this.carregarNotas();
-
-  }
-
-
   private carregarNotas(): void {
 
-    console.log(
-      'Buscando notas na API...'
-    );
-
-
-    this.carregando = true;
-
+    console.log('Buscando notas na API...');
 
     this.notaFiscalService.listarNotas().subscribe({
 
@@ -352,19 +418,20 @@ export class NotaFiscal implements OnInit {
           notas
         );
 
+        this.notasCadastradas = [...notas];
 
-        this.notasCadastradas = notas;
+        console.log(
+          'Notas abertas:',
+          this.notasAbertas
+        );
 
-
-        // IMPORTANTE:
-        // Aqui abrimos a área das notas
-        this.mostrarNotas = true;
-
-
-        this.carregando = false;
+        console.log(
+          'Notas fechadas:',
+          this.notasFechadas
+        );
+        this.cdr.detectChanges();
 
       },
-
 
       error: (erro) => {
 
@@ -373,20 +440,92 @@ export class NotaFiscal implements OnInit {
           erro
         );
 
-
-        this.carregando = false;
-
-
-        this.mostrarNotas = false;
-
-
-        alert(
-          'Não foi possível carregar as notas fiscais.'
-        );
-
       }
 
     });
+
+  }
+
+  alternarNotasFechadas(): void {
+
+    this.mostrarNotasFechadas =
+      !this.mostrarNotasFechadas;
+
+  }
+
+  imprimirNota(id: number): void {
+
+    this.carregando = true;
+
+
+    console.log(
+      'Imprimindo nota:',
+      id
+    );
+
+
+    this.notaFiscalService
+      .imprimirNota(id)
+      .subscribe({
+
+        next: (notaAtualizada) => {
+
+          console.log(
+            'NOTA RECEBIDA:',
+            notaAtualizada
+          );
+
+          this.notasCadastradas =
+            this.notasCadastradas.map(nota =>
+
+              nota.id === notaAtualizada.id
+                ? notaAtualizada
+                : nota
+
+            );
+
+
+          this.carregando = false;
+
+
+          alert(
+            'Nota fiscal impressa com sucesso!'
+          );
+
+        },
+
+
+        error: (erro) => {
+
+          console.error(
+            'Erro ao imprimir nota:',
+            erro
+          );
+
+
+          this.carregando = false;
+
+
+          if (erro.status === 503) {
+
+            alert(
+              'O serviço de estoque está indisponível. ' +
+              'Tente novamente mais tarde.'
+            );
+
+            return;
+
+          }
+
+
+          alert(
+            erro.error?.mensagem ||
+            'Não foi possível imprimir a nota fiscal.'
+          );
+
+        }
+
+      });
 
   }
 

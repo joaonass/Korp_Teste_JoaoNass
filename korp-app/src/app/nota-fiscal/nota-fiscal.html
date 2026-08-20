@@ -6,43 +6,34 @@
 
       <h2>Criar uma nota fiscal</h2>
 
-      <form (ngSubmit)="imprimirNotas()">
+      <form (ngSubmit)="cadastrarNotas()">
 
-        @for (nota of notas; track $index; let indiceNota = $index) {
+        @for (
+        nota of notas;
+        track $index;
+        let indiceNota = $index
+        ) {
 
         <div class="nota-fiscal">
 
           <h3>
-            Nota fiscal {{ indiceNota + 1 }}
+            Nova nota fiscal {{ indiceNota + 1 }}
           </h3>
 
           <div>
 
             <p>
-              **Código será gerado automaticamente pelo sistema
+              <strong>
+                Código será gerado automaticamente pelo sistema.
+              </strong>
             </p>
 
-            <label [for]="'tipo-nota-' + indiceNota">
-              Nota
-            </label>
-
-            <select [id]="'tipo-nota-' + indiceNota"
-                    [name]="'tipo-nota-' + indiceNota"
-                    [(ngModel)]="nota.status">
-
-              <option value="aberto">
-                Aberto
-              </option>
-
-              <option value="fechado">
-                Fechado
-              </option>
-
-            </select>
+            <p>
+              <strong>Status inicial:</strong>
+              Aberta
+            </p>
 
           </div>
-
-
 
           <div class="produtos">
 
@@ -53,7 +44,6 @@
             ) {
 
             <div class="produto-quantidade">
-
 
               <!-- PRODUTO -->
 
@@ -66,46 +56,54 @@
                   Selecione o produto
                 </option>
 
-                @for (produtoEstoque of produtos; track produtoEstoque.id) {
+                @for (
+                produtoEstoque of produtos;
+                track produtoEstoque.id
+                ) {
+
+                @if (
+                !produtoJaSelecionado(
+                nota,
+                produtoEstoque.id,
+                indiceProduto
+                )
+                ) {
 
                 <option [ngValue]="produtoEstoque.id">
-                  {{ produtoEstoque.codigo }} - {{ produtoEstoque.descricao }}
+
+                  {{ produtoEstoque.codigo }}
+                  -
+                  {{ produtoEstoque.descricao }}
+                  -
+                  Estoque:
+                  {{ produtoEstoque.saldo }}
+
                 </option>
+
+                }
 
                 }
 
               </select>
 
-
-
-              <select [id]="'quantidade-' + indiceNota + '-' + indiceProduto"
-                      [name]="'quantidade-' + indiceNota + '-' + indiceProduto"
-                      class="quantidade"
-                      [(ngModel)]="produto.quantidade">
-
-                <option [ngValue]="null">
-                  Qtd
-                </option>
-
-                <option [ngValue]="1">1</option>
-                <option [ngValue]="2">2</option>
-                <option [ngValue]="3">3</option>
-                <option [ngValue]="4">4</option>
-                <option [ngValue]="5">5</option>
-                <option [ngValue]="6">6</option>
-                <option [ngValue]="7">7</option>
-                <option [ngValue]="8">8</option>
-                <option [ngValue]="9">9</option>
-                <option [ngValue]="10">10</option>
-
-              </select>
+              <input type="number"
+                     [id]="'quantidade-' + indiceNota + '-' + indiceProduto"
+                     [name]="'quantidade-' + indiceNota + '-' + indiceProduto"
+                     class="quantidade"
+                     [(ngModel)]="produto.quantidade"
+                     min="1"
+                     [max]="obterSaldoProduto(produto.produtoId)"
+                     placeholder="Qtd">
 
 
               @if (nota.produtos.length > 1) {
 
               <button type="button"
                       class="removerB"
-                      (click)="removerProduto(indiceNota, indiceProduto)">
+                      (click)="removerProduto(
+                        indiceNota,
+                        indiceProduto
+                      )">
 
                 Remover produto
 
@@ -117,8 +115,6 @@
 
             }
 
-
-
             <button type="button"
                     class="adicionarB"
                     (click)="adicionarProduto(indiceNota)">
@@ -128,7 +124,6 @@
             </button>
 
           </div>
-
 
           @if (notas.length > 1) {
 
@@ -155,9 +150,14 @@
         </button>
 
         <button type="submit"
-                class="cadastroB">
+                class="cadastroB"
+                [disabled]="carregando">
 
-          Imprimir notas
+          {{
+            carregando
+              ? 'Cadastrando...'
+              : 'Cadastrar notas'
+          }}
 
         </button>
 
@@ -167,85 +167,248 @@
 
   </section>
 
+  <div class="notas-grid">
 
-  <button type="button"
-          class="cadastroB"
-          (click)="mostrarNotas = !mostrarNotas">
+    <div class="notas-container">
 
-    {{
- mostrarNotas
-      ? 'Ocultar notas fiscais'
-      : 'Verificar todas as notas fiscais'
-    }}
+      <section class="notas">
 
-  </button>
+        <div class="card">
+
+          <h2>
+            Notas fiscais abertas
+          </h2>
 
 
-  @if (mostrarNotas) {
+          @if (notasAbertas.length === 0) {
 
-  <section class="notas">
+          <p>
+            Nenhuma nota fiscal aberta.
+          </p>
 
-    <div class="card">
+          } @else {
 
-      <h2>Notas fiscais cadastradas</h2>
+          @for (
+          nota of notasAbertas;
+          track nota.id
+          ) {
 
-      @if (notasCadastradas.length === 0) {
+          <div class="nota-cadastrada">
 
-      <p>Nenhuma nota fiscal cadastrada.</p>
+            <div class="nota-topo">
 
-      } @else {
+              <h3>
+                Nota fiscal #{{ nota.codigo }}
+              </h3>
 
-      @for (nota of notasCadastradas; track nota.id) {
+              <span>
+                Status:
+                {{ nota.status }}
+              </span>
 
-      <div class="nota-cadastrada">
+            </div>
 
-        <div class="nota-topo">
+            <button type="button"
+                    class="cadastroB"
+                    [disabled]="carregando"
+                    (click)="imprimirNota(nota.id)">
 
-          <h3>
-            Nota fiscal #{{ nota.id }}
-          </h3>
+              {{
+                    carregando
+                      ? 'Processando...'
+                      : '🖨 Imprimir nota'
+              }}
 
-          <span>
-            Status: {{ nota.status }}
-          </span>
+            </button>
+
+
+            <h4>
+              Produtos da nota
+            </h4>
+
+
+            @if (nota.itens.length === 0) {
+
+            <p>
+              Esta nota não possui produtos.
+            </p>
+
+            } @else {
+
+            <div class="tabela">
+
+              <div class="linha cabecalho">
+
+                <span>
+                  Produto
+                </span>
+
+                <span>
+                  Quantidade
+                </span>
+
+              </div>
+
+
+              @for (
+              item of nota.itens;
+              track $index
+              ) {
+
+              <div class="linha">
+
+                <span>
+
+                  Produto ID:
+                  {{ item.produtoId }}
+
+                  {{
+                            obterDescricaoProduto(
+                              item.produtoId
+                            )
+                  }}
+
+                </span>
+
+
+                <span>
+                  {{ item.quantidade }}
+                </span>
+
+              </div>
+
+              }
+
+            </div>
+
+            }
+
+          </div>
+
+          }
+
+          }
 
         </div>
 
+      </section>
 
-        <h4>Produtos da nota</h4>
+    </div>
+
+    <section class="notas">
+
+      <div class="card">
+
+        <button type="button"
+                class="cadastroB"
+                (click)="alternarNotasFechadas()">
+
+          {{
+            mostrarNotasFechadas
+              ? 'Ocultar notas fechadas'
+              : 'Ver notas fechadas'
+          }}
+
+        </button>
 
 
-        @if (nota.itens.length === 0) {
+        @if (mostrarNotasFechadas) {
+
+        <h2>
+          Notas fiscais fechadas
+        </h2>
+
+
+        @if (notasFechadas.length === 0) {
 
         <p>
-          Esta nota não possui produtos.
+          Nenhuma nota fiscal fechada.
         </p>
 
         } @else {
 
-        <div class="tabela">
+        @for (
+        nota of notasFechadas;
+        track nota.id
+        ) {
 
-          <div class="linha cabecalho">
+        <div class="nota-cadastrada">
 
-            <span>Produto</span>
-            <span>Quantidade</span>
+          <div class="nota-topo">
+
+            <h3>
+              Nota fiscal #{{ nota.codigo }}
+            </h3>
+
+            <span>
+              Status:
+              {{ nota.status }}
+            </span>
 
           </div>
 
+          <p>
+            <strong>
+              Nota fechada.
+            </strong>
+          </p>
 
-          @for (item of nota.itens; track $index) {
+          <h4>
+            Produtos da nota
+          </h4>
 
-          <div class="linha">
 
-            <span>
-              Produto ID: {{ item.produtoId }}
-              Descrição: {{ obterDescricaoProduto(item.produtoId) }}
+          @if (nota.itens.length === 0) {
 
-            </span>
+          <p>
+            Esta nota não possui produtos.
+          </p>
 
-            <span>
-              {{ item.quantidade }}
-            </span>
+          } @else {
+
+          <div class="tabela">
+
+            <div class="linha cabecalho">
+
+              <span>
+                Produto
+              </span>
+
+              <span>
+                Quantidade
+              </span>
+
+            </div>
+
+
+            @for (
+            item of nota.itens;
+            track $index
+            ) {
+
+            <div class="linha">
+
+              <span>
+
+                Produto ID:
+                {{ item.produtoId }}
+
+                {{
+                            obterDescricaoProduto(
+                              item.produtoId
+                            )
+                }}
+
+              </span>
+
+
+              <span>
+                {{ item.quantidade }}
+              </span>
+
+            </div>
+
+            }
 
           </div>
 
@@ -255,16 +418,14 @@
 
         }
 
+        }
+
+        }
+
       </div>
 
-      }
+    </section>
 
-      }
-
-    </div>
-
-  </section>
-
-  }
+  </div>
 
 </main>
